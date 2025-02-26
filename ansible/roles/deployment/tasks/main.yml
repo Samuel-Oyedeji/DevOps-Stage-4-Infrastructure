@@ -1,0 +1,10 @@
+- name: Clone Application Repository
+  git:
+    repo: "https://github.com/Samuel-Oyedeji/DevOps-Stage-4.git"
+    dest: "/home/ubuntu/app"
+    version: main
+
+- name: Deploy Application with Docker Compose
+  shell: |
+    cd /home/ubuntu/app
+    docker-compose up -d
