@@ -1,0 +1,6 @@
+- name: Configure and Deploy Application
+  hosts: localhost
+  become: true
+  roles:
+    - dependencies
+    - deployment
