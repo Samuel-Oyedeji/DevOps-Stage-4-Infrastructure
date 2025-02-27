@@ -2,13 +2,35 @@ provider "aws" {
   region = "us-east-1"
 }
 
-resource "aws_instance" "app_server" {
-  ami           = "ami-04b4f1a9cf54c11d0"  # Amazon Linux / Ubuntu AMI
-  instance_type = "t2.micro"
-  key_name      = "your-ssh-key"           # Only for emergency access (Not used for Ansible)
-  security_groups = [aws_security_group.app_sg.name]
+# Define variables
+variable "subnet_id" {
+  description = "Subnet where the instance will be launched"
+  type        = string
+}
 
-  # User data runs our Ansible Pull script when the server starts
+variable "security_group_id" {
+  description = "Security Group for the instance"
+  type        = string
+}
+
+variable "key_name" {
+  description = "SSH Key Name"
+  type        = string
+}
+
+variable "allowed_ssh_ip" {
+  description = "Allowed SSH CIDR block (e.g., your public IP)"
+  type        = string
+  default     = "0.0.0.0/0" # Change this to a specific IP for security
+}
+
+resource "aws_instance" "app_server" {
+  ami           = "ami-04b4f1a9cf54c11d0"
+  instance_type = "t2.micro"
+  subnet_id     = var.subnet_id
+  key_name      = var.key_name
+  vpc_security_group_ids = [aws_security_group.app_sg.id]
+
   user_data = file("${path.module}/provision.sh")
 
   tags = {
@@ -32,6 +54,13 @@ resource "aws_security_group" "app_sg" {
     to_port     = 443
     protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]  # Allow HTTPS
+  }
+
+  ingress {
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = [var.allowed_ssh_ip]  # Restrict SSH access
   }
 
   egress {
