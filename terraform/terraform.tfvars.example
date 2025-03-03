@@ -1,0 +1,4 @@
+subnet_id        = "subnet-**********"
+security_group_id = "sg-**********"
+key_name         = "your-ssh-key"
+allowed_ssh_ip   = "0.0.0.0/0"  # Replace with your IP
